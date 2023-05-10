@@ -6,25 +6,32 @@ from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SequentialChain
 from langchain.memory import ConversationBufferMemory
-from langchain.utilities import WikipediaAPIWrapper
+from langchain.utilities import WikipediaAPIWrapper, SerpAPIWrapper
+from langchain.agents import load_tools, initialize_agent, AgentType
 
 # App framework
 st.title("🦜🔗 White Paper Generator")
 prompt = st.text_input("What topic would you like the white paper to be about?")
 
 # Prompt templates
+# search_template = PromptTemplate(
+#     input_variables=["topic"],
+#     template="Search for 5 current news items or items of interest related to: {topic}"
+# )
+
 title_template = PromptTemplate(
-    input_variables=["topic"], template="Generate a white paper title about {topic}"
+    input_variables=["topic", "search_results"],
+    template="Generate a white paper title about {topic} based on these findings from a search {search_results}",
 )
 
 exec_summary_template = PromptTemplate(
-    input_variables=["title", "wikipedia_research"],
-    template="Generate an executive summary for a white paper based on: {title} while leveraging wikipedia reserch: {wikipedia_research}",
+    input_variables=["title", "wikipedia_research", "search_results"],
+    template="Generate an executive summary for a white paper based on: {title} while leveraging wikipedia reserch: {wikipedia_research} and search results: {search_results}",
 )
 
 intro_paragraph_template = PromptTemplate(
-    input_variables=["title", "wikipedia_research", "exec_summary"],
-    template="Generate an introductory paragrapgh for a white paper based on: {title} and {exec_summary} while leveraging wikipedia reserch: {wikipedia_research}",
+    input_variables=["title", "wikipedia_research", "exec_summary", "search_results"],
+    template="Generate an introductory paragrapgh for a white paper based on: {title} and {exec_summary} while leveraging wikipedia reserch: {wikipedia_research} and these search results: {search_results}",
 )
 
 # Memory
@@ -65,16 +72,30 @@ intro_paragraph_chain = LLMChain(
 
 
 wiki = WikipediaAPIWrapper()
+search = SerpAPIWrapper()
+tools = load_tools(["serpapi"])
+agent = initialize_agent(
+    tools=tools, llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=False
+)
 
 # Show stuff to the screen if there's a prompt
 if prompt:
-    title = title_chain.run(prompt)
+    search_results = agent.run(
+        f"Search for 5 current news items or items of interest related to: {prompt}"
+    )
+    title = title_chain.run(topic=prompt, search_result=search_result)
     wiki_research = wiki.run(prompt)
-    exec_summary = exec_summary_chain.run(title=title, wikipedia_research=wiki_research)
+    exec_summary = exec_summary_chain.run(
+        title=title, wikipedia_research=wiki_research, search_results=search_results
+    )
     into_paragraph = intro_paragraph_chain.run(
-        title=title, wikipedia_research=wiki_research, exec_summary=exec_summary
+        title=title,
+        wikipedia_research=wiki_research,
+        exec_summary=exec_summary,
+        search_results=search_results,
     )
 
+    st.write(search_results)
     st.write(title)
     st.write("Executive Summary")
     st.write(exec_summary)
