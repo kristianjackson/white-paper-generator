@@ -21,7 +21,7 @@ prompt = st.text_input("What topic would you like the white paper to be about?")
 
 title_template = PromptTemplate(
     input_variables=["topic", "search_results"],
-    template="Generate a white paper title about {topic} based on these findings from a search {search_results}",
+    template="Generate a white paper title about {topic} based on these findings from a search: {search_results}",
 )
 
 exec_summary_template = PromptTemplate(
@@ -83,7 +83,7 @@ if prompt:
     search_results = agent.run(
         f"Search for 5 current news items or items of interest related to: {prompt}"
     )
-    title = title_chain.run(topic=prompt, search_result=search_results)
+    title = title_chain.run(topic=prompt, search_results=search_results)
     wiki_research = wiki.run(prompt)
     exec_summary = exec_summary_chain.run(
         title=title, wikipedia_research=wiki_research, search_results=search_results
