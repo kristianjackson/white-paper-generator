@@ -83,7 +83,7 @@ if prompt:
     search_results = agent.run(
         f"Search for 5 current news items or items of interest related to: {prompt}"
     )
-    title = title_chain.run(topic=prompt, search_result=search_result)
+    title = title_chain.run(topic=prompt, search_result=search_results)
     wiki_research = wiki.run(prompt)
     exec_summary = exec_summary_chain.run(
         title=title, wikipedia_research=wiki_research, search_results=search_results
