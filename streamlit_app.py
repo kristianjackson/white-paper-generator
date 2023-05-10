@@ -75,14 +75,13 @@ wiki = WikipediaAPIWrapper()
 search = SerpAPIWrapper()
 tools = load_tools(["serpapi"])
 agent = initialize_agent(
-    tools=tools, llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=False
+    tools=tools, llm=llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
 )
 
 # Show stuff to the screen if there's a prompt
 if prompt:
     search_results = agent.run(
         f"Find content related to {prompt} for use in generating a white paper based on current information no older than 1 year from today's date.",
-        verbose=True,
     )
     title = title_chain.run(topic=prompt, search_results=search_results)
     wiki_research = wiki.run(prompt)
