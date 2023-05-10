@@ -81,7 +81,8 @@ agent = initialize_agent(
 # Show stuff to the screen if there's a prompt
 if prompt:
     search_results = agent.run(
-        f"Search for 5 current news items or items of interest related to: {prompt}"
+        f"Find content related to {prompt} for use in generating a white paper based on current information no older than 1 year from today's date.",
+        verbose=True,
     )
     title = title_chain.run(topic=prompt, search_results=search_results)
     wiki_research = wiki.run(prompt)
