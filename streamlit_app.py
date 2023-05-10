@@ -83,21 +83,26 @@ if prompt:
     search_results = agent.run(
         f"Find content related to {prompt} for use in generating a white paper based on current information no older than 1 year from today's date.",
     )
+    st.write(
+        f"Find content related to {prompt} for use in generating a white paper based on current information no older than 1 year from today's date."
+    )
+    st.write(search_results)
+
     title = title_chain.run(topic=prompt, search_results=search_results)
+    st.write(title)
+
     wiki_research = wiki.run(prompt)
     exec_summary = exec_summary_chain.run(
         title=title, wikipedia_research=wiki_research, search_results=search_results
     )
+    st.write("Executive Summary")
+    st.write(exec_summary)
+
     into_paragraph = intro_paragraph_chain.run(
         title=title,
         wikipedia_research=wiki_research,
         exec_summary=exec_summary,
         search_results=search_results,
     )
-
-    st.write(search_results)
-    st.write(title)
-    st.write("Executive Summary")
-    st.write(exec_summary)
     st.write("Analysis")
     st.write(into_paragraph)
