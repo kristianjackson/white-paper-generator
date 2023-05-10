@@ -13,27 +13,29 @@ from bs4 import BeautifulSoup
 import requests
 import re
 
+
 def scrape_webpage(url):
     response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
+    soup = BeautifulSoup(response.text, "html.parser")
+
     # Remove all script and style elements
     for script in soup(["script", "style"]):
-        script.extract() 
-    
+        script.extract()
+
     # Get text
     text = soup.get_text()
-    
+
     # Remove leading and trailing spaces
     lines = (line.strip() for line in text.splitlines())
-    
+
     # Break multi-headlines into a line each
     chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-    
+
     # Drop blank lines
-    text = '\n'.join(chunk for chunk in chunks if chunk)
-    
+    text = "\n".join(chunk for chunk in chunks if chunk)
+
     return text
+
 
 # App framework
 st.title("🦜🔗 White Paper Generator")
@@ -84,7 +86,7 @@ title_chain = LLMChain(
 )
 exec_summary_chain = LLMChain(
     # llm=creative_llm,
-    llm=llm
+    llm=llm,
     prompt=exec_summary_template,
     verbose=True,
     output_key="exec_summary",
@@ -115,7 +117,7 @@ if prompt:
         f"Find content related to {prompt} for use in generating a white paper based on current information no older than 1 year from today's date."
     )
     st.write(search_results)
-    
+
     scraped_content = [scrape_webpage(url) for url in search_results]
     st.write(scraped_content)
 
